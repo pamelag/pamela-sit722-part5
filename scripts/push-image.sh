@@ -4,6 +4,6 @@ set -u # or set -o nounset
 : "$VERSION"
 : "$REGISTRY_UN"
 : "$REGISTRY_PW"
+: "$SERVICE_API"
 
-docker push $CONTAINER_REGISTRY/book-catalog:$VERSION
-docker push $CONTAINER_REGISTRY/inventory-management:$VERSION
+docker push $CONTAINER_REGISTRY/$SERVICE_API:$VERSION

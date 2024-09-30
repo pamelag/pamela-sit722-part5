@@ -1,0 +1,77 @@
+# 
+# GitHub Actions workflow.
+#
+
+name: Deploy book-catalog microservice
+
+on:
+  #
+  # Deploys book-catalog triggered by push to this repository.
+  #
+  #push: 
+  #  branches:
+  #    - main
+
+  #
+  # Allows deployment to be invoked manually through the GitHub Actions user interface.
+  #
+  workflow_dispatch: 
+
+jobs:
+
+  deploy:
+    runs-on: ubuntu-latest
+    
+    env:
+      VERSION: ${{ github.sha }}
+      CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+      REGISTRY_UN: ${{ secrets.REGISTRY_UN }}
+      REGISTRY_PW: ${{ secrets.REGISTRY_PW  }}
+      PG_EXTERNAL_URL: ${{ secrets.PG_EXTERNAL_URL  }}
+      SERVICE_API: book-catalog
+      SERVICE_NAME: book_catalog
+
+    steps:
+      
+      # Checks-out your repository under $GITHUB_WORKSPACE.
+      - uses: actions/checkout@v3
+      #
+      # Grants execute permission to build script.
+      #
+      - name: Set Build Script Perm
+        run: chmod +x ./scripts/build-image.sh
+      #
+      # Builds the Docker image.
+      #
+      - name: Build
+        run: ./scripts/build-image.sh
+
+      #
+      # Grant Execute permission to push script.
+      #
+      - name: Set Push Script Perm
+        run: chmod +x ./scripts/push-image.sh
+      #
+      # Publish Docker image to the container registry.
+      #
+      - name: Publish Image
+        run: ./scripts/push-image.sh
+
+      #
+      # Installs Kubectl and connects it to the cluster.
+      #
+      #
+      - uses: tale/kubectl-action@v1
+        with:
+          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+          kubectl-version: v1.24.2
+      #
+      # Grant Execute permission to deploy script.
+      #
+      - name: Set Deploy Script Perm
+        run: chmod +x ./scripts/deploy.sh
+      #
+      # Expands the configuration template and deploys the microservice.
+      #
+      - name: Deploy
+        run: ./scripts/deploy.sh
