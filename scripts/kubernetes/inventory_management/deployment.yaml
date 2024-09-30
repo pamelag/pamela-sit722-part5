@@ -21,4 +21,4 @@ spec:
         - name: PORT
           value: "8081"
         - name: DATABASE_URL
-          value: "PG_EXTERNAL_URL"
+          value: "$PG_EXTERNAL_URL"
